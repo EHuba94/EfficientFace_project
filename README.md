@@ -6,3 +6,5 @@
   booktitle = {Proceedings of the IEEE/CVF international conference on computer vision},
   year      = {2019},
 }
+
+some of the test pictures taken from here: https://susanqq.github.io/UTKFace/
