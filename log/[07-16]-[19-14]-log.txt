@@ -1,0 +1,11 @@
+Current learning rate: 0.001
+Epoch: [0][  0/192]	Loss 1.9447 (1.9447)	Accuracy 17.188 (17.188)
+Epoch: [0][ 10/192]	Loss 1.7710 (1.8307)	Accuracy 15.234 (14.773)
+Epoch: [0][ 20/192]	Loss 1.6931 (1.7776)	Accuracy 13.281 (14.342)
+Epoch: [0][ 30/192]	Loss 1.7074 (1.7543)	Accuracy 13.281 (14.667)
+Epoch: [0][ 40/192]	Loss 1.6705 (1.7387)	Accuracy 14.844 (14.691)
+Epoch: [0][ 50/192]	Loss 1.6845 (1.7300)	Accuracy 12.500 (14.691)
+Epoch: [0][ 60/192]	Loss 1.6734 (1.7252)	Accuracy 14.844 (14.613)
+Epoch: [0][ 70/192]	Loss 1.6911 (1.7197)	Accuracy 16.016 (14.431)
+Epoch: [0][ 80/192]	Loss 1.7330 (1.7169)	Accuracy 17.578 (14.284)
+Epoch: [0][ 90/192]	Loss 1.7191 (1.7149)	Accuracy 12.891 (14.354)

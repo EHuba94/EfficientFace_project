@@ -53,7 +53,7 @@ def main():
     model_cla = EfficientFace.efficient_face()
     model_cla.fc = nn.Linear(1024, 7)
     model_cla = torch.nn.DataParallel(model_cla).cuda()
-    checkpoint = torch.load('./checkpoint/EfficientFace_Trained_on_CAERS.pth.tar')
+    checkpoint = torch.load('./checkpoint/EfficientFace_Trained_on_CAERS.pth.tar', weights_only=True)
     pre_trained_dict = checkpoint['state_dict']
     model_cla.load_state_dict(pre_trained_dict)
     model_cla.module.fc = nn.Linear(1024, 7).cuda()
@@ -61,12 +61,12 @@ def main():
     model_dis = resnet.resnet50()
     model_dis.fc = nn.Linear(2048, 7)
     model_dis = torch.nn.DataParallel(model_dis).cuda()
-    checkpoint = torch.load('./checkpoint/LDG_Pretrained_on_CAERS.tar')#torch.load('./checkpoint/resnet18_pretrained_on_msceleb.pth.tar')#
+    checkpoint = torch.load('./checkpoint/LDG_Pretrained_on_CAERS.tar', weights_only=True)#torch.load('./checkpoint/resnet18_pretrained_on_msceleb.pth.tar')#
     model_dis.load_state_dict(checkpoint['state_dict'])
 
     # define loss function (criterion) and optimizer
     criterion_val = nn.CrossEntropyLoss().cuda()
-    criterion_train = cross_entropy
+    criterion_train = nn.CrossEntropyLoss().cuda() #cross_entropy
 
     optimizer = torch.optim.Adam(model_cla.parameters(),
                                 args.lr,
@@ -158,8 +158,8 @@ def main():
         txt_name = './log/' + time_str + 'log.txt'
         with open(txt_name, 'a') as f:
             f.write('Current best accuracy: ' + str(best_acc.item()) + '\n')
-        save_checkpoint(epoch, model_cla, optimizer, scheduler, is_best, args)
-        #save_checkpoint({'state_dict': model_cla.state_dict()}, is_best, args)
+        #save_checkpoint(epoch, model_cla, optimizer, is_best, args) #scheduler, is_best, args)
+        save_checkpoint({'state_dict': model_cla.state_dict()}, is_best, args)
         end_time = time.time()
         epoch_time = end_time - start_time
         print("An Epoch Time: ", epoch_time)
@@ -189,15 +189,27 @@ def train(train_loader, model_cla, model_dis, criterion, optimizer, epoch, args)
         # compute output
         output = model_cla(images)
         output_prob = soft_max(output)
-
+        #print("Output shape " , output.shape)
         # compute label distribution
         with torch.no_grad():
             soft_label = model_dis(images)
             soft_label_prob = soft_max(soft_label)
+        #print("Soft label shape:", soft_label.shape)
+        # compute loss
+        # Convert soft labels to class indices
+        #soft_label_indices = soft_label.argmax(dim=1)
+        #print("Soft label indices shape:", soft_label_indices.shape)
 
         # compute loss
-        loss = criterion(output_prob, soft_label_prob)
-
+        try:
+            loss = criterion(output_prob,soft_label_prob) # soft_label_indices)
+        except RuntimeError as e:
+            print("Error in loss computation:", e)
+            print("Output shape:", output.shape)
+            print("Soft label indices shape:", soft_label_indices.shape)
+            continue
+        #loss = criterion(output_prob, soft_label_prob)
+        #loss = criterion(output, soft_label.argmax(dim=1))
         # measure accuracy and record loss
         acc1, _ = accuracy(output, target, topk=(1, 5))
         losses.update(loss.item(), images.size(0))
@@ -250,17 +262,20 @@ def validate(val_loader, model, criterion, args):
             f.write(' * Accuracy {top1.avg:.3f}'.format(top1=top1) + '\n')
     return top1.avg, losses.avg
 
-
-def save_checkpoint(epoch, model, optimizer, scheduler, is_best, args):
-    state = {
-        'epoch': epoch,
-        'state_dict': model.state_dict(),
-        'optimizer': optimizer.state_dict(),
-        'scheduler': scheduler.state_dict(),  # Add the scheduler state here
-    }
+def save_checkpoint(state, is_best, args):
     torch.save(state, args.checkpoint_path)
     if is_best:
         shutil.copyfile(args.checkpoint_path, args.best_checkpoint_path)
+#def save_checkpoint(epoch, model, optimizer, scheduler, is_best, args):
+#    state = {
+#        'epoch': epoch,
+#        'state_dict': model.state_dict(),
+#        'optimizer': optimizer.state_dict(),
+       # 'scheduler': scheduler.state_dict(),  # Add the scheduler state here
+#    }
+#    torch.save(state, args.checkpoint_path)
+#    if is_best:
+#        shutil.copyfile(args.checkpoint_path, args.best_checkpoint_path)
 
 
 def cross_entropy(predict_label, true_label):
