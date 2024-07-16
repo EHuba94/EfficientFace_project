@@ -14,14 +14,22 @@ np.set_printoptions(precision=3, suppress=True)
 import time
 
 def main():
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+
+	# Check if CUDA is available
+    if not torch.cuda.is_available():
+        print("CUDA is not available. Exiting.")
+        return
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
     
     # create model
     ## EfficientFace
     model = EfficientFace.efficient_face()
     model.fc = nn.Linear(1024, 7)
     model = torch.nn.DataParallel(model).cuda()
-    checkpoint = torch.load('./checkpoint/EfficientFace_Trained_on_CAERS.pth.tar')
+    checkpoint = torch.load ('./checkpoint/self_CAER_train3_best_512.pth.tar')#torch.load('./checkpoint/EfficientFace_Trained_on_CAERS.pth.tar')
     pre_trained_dict = checkpoint['state_dict']
     model.load_state_dict(pre_trained_dict)
 

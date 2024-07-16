@@ -178,7 +178,7 @@ class EfficientFace(nn.Module):
         self.conv5 = nn.Sequential(nn.Conv2d(input_channels, output_channels, 1, 1, 0, bias=False),
                                    nn.BatchNorm2d(output_channels),
                                    nn.ReLU(inplace=True),)
-        self.dropout = nn.Dropout(p=0.25)
+        self.dropout = nn.Dropout(p=0.4)
         self.fc = nn.Linear(output_channels, num_classes)
 
     def forward(self, x):
