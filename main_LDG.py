@@ -16,6 +16,7 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 import numpy as np
 import datetime
+import timm
 from models import resnet
 from models import EfficientFace
 
@@ -58,12 +59,13 @@ def main():
     model_cla.load_state_dict(pre_trained_dict)
     model_cla.module.fc = nn.Linear(1024, 7).cuda()
     ## LDG
-    model_dis = resnet.resnet50()
-    model_dis.fc = nn.Linear(2048, 7)
+    #model_dis = resnet.resnet50()
+    #model_dis.fc = nn.Linear(2048, 7)
+    #model_dis = torch.nn.DataParallel(model_dis).cuda()
+    #checkpoint = torch.load('./checkpoint/LDG_Pretrained_on_CAERS.tar', weights_only=True)#torch.load('./checkpoint/resnet18_pretrained_on_msceleb.pth.tar')#
+    #model_dis.load_state_dict(checkpoint['state_dict'])
+    model_dis = timm.create_model('vit_large_patch16_224', pretrained=True, num_classes=7)
     model_dis = torch.nn.DataParallel(model_dis).cuda()
-    checkpoint = torch.load('./checkpoint/LDG_Pretrained_on_CAERS.tar', weights_only=True)#torch.load('./checkpoint/resnet18_pretrained_on_msceleb.pth.tar')#
-    model_dis.load_state_dict(checkpoint['state_dict'])
-
     # define loss function (criterion) and optimizer
     criterion_val = nn.CrossEntropyLoss().cuda()
     criterion_train = nn.CrossEntropyLoss().cuda() #cross_entropy

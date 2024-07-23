@@ -16,6 +16,7 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 import numpy as np
 import datetime
+import timm
 from models import resnet
 from models import EfficientFace
 
@@ -50,13 +51,16 @@ def main():
 
     # create model
     ## EfficientFace
-    model_cla = EfficientFace.efficient_face()
-    model_cla.fc = nn.Linear(1024, 7)
+    #model_cla = EfficientFace.efficient_face()
+    #model_cla.fc = nn.Linear(1024, 7)
+    #model_cla = torch.nn.DataParallel(model_cla).cuda()
+    #checkpoint = torch.load('./checkpoint/EfficientFace_Trained_on_CAERS.pth.tar', weights_only=True)#torch.load('./checkpoint/[07-14]-[15-24]-model_best.pth.tar')#
+    #pre_trained_dict = checkpoint['state_dict']
+    #model_cla.load_state_dict(pre_trained_dict)
+    #model_cla.module.fc = nn.Linear(1024, 7).cuda()
+    
+    model_cla = timm.create_model('vit_base_patch16_224', pretrained=True, num_classes=7)
     model_cla = torch.nn.DataParallel(model_cla).cuda()
-    checkpoint = torch.load('./checkpoint/EfficientFace_Trained_on_CAERS.pth.tar', weights_only=True)#torch.load('./checkpoint/[07-14]-[15-24]-model_best.pth.tar')#
-    pre_trained_dict = checkpoint['state_dict']
-    model_cla.load_state_dict(pre_trained_dict)
-    model_cla.module.fc = nn.Linear(1024, 7).cuda()
 
     ## Previous LDG model
     # model_dis = resnet.resnet50()
